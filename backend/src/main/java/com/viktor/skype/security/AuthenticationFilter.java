@@ -2,7 +2,7 @@ package com.viktor.skype.security;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viktor.skype.data.User;
+import com.viktor.skype.data.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
