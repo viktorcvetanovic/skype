@@ -3,49 +3,45 @@ package com.viktor.skype.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viktor.skype.data.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    protected User user;
+    protected AuthenticationFilter(AuthenticationManager authenticationManager){
+        setAuthenticationManager(authenticationManager);
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        readRequest(request);
-        System.out.println("caoo");
-        System.out.println(user);
-        return super.attemptAuthentication(request, response);
-    }
-
-
-    private void readRequest(HttpServletRequest request) {
-        if (user != null) {
-            return;
+        String username = obtainUsername(request);
+        String password = obtainPassword(request);
+        if (username == null || password == null) {
+            throw new AuthenticationCredentialsNotFoundException("You have not entered a username or password");
         }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            user = mapper.readValue(request.getInputStream(), User.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            user = null;
-        }
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+        return getAuthenticationManager().authenticate(token);
     }
 
     @Override
-    protected String obtainPassword(HttpServletRequest request) {
-        readRequest(request);
-        return user.getPassword();
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
+        User user = (User) authResult.getPrincipal();
+        String refreshToken = JwtToken.generateRefreshToken(user);
+        String accessToken = JwtToken.generateAccessToken(user);
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader("access_token", accessToken);
+        response.setHeader("refresh_token", refreshToken);
     }
 
-    @Override
-    protected String obtainUsername(HttpServletRequest request) {
-        readRequest(request);
-        return user.getUsername();
-    }
 }
