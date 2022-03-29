@@ -17,13 +17,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+        UserDetails user=userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        System.out.println(user);
+        return user;
     }
 
     @Override
     public User save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
+    }
+
+    @Override
+    public User findByUsernameAndPassword(String username,String password) {
+        return userRepository.findByUsernameAndPassword(username,password)
+                .orElse(null);
     }
 }

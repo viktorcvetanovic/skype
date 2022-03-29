@@ -1,5 +1,6 @@
 package com.viktor.skype.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -26,6 +27,8 @@ public class User  implements UserDetails {
     @Column(name = "password")
     private String password;
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonIgnore
     private List<Role> authorities;
 
     @Override
