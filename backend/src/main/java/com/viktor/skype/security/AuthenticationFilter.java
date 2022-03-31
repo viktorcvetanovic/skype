@@ -23,7 +23,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final UserService userService;
 
     protected AuthenticationFilter(AuthenticationManager authenticationManager, UserService userService) {
-        setAuthenticationManager(authenticationManager);
+        super(authenticationManager);
         this.userService = userService;
     }
 
@@ -49,7 +49,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        System.out.println("CAOOOOOOOO");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
     }
